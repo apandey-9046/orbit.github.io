@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#4285f4">
+    <title>AI Assistant</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto Mono', monospace;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            height: 90vh;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .header {
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(45deg, #ff8a00, #e52e71);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .app-name {
+            color: white;
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 50px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message {
+            max-width: 70%;
+            padding: 15px;
+            border-radius: 15px;
+            animation: fadeIn 0.3s ease;
+            position: relative;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .user-message {
+            align-self: flex-end;
+            background: linear-gradient(135deg, #4776E6, #8E54E9);
+            color: white;
+            border-bottom-right-radius: 5px;
+        }
+
+        .bot-message {
+            align-self: flex-start;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            border-bottom-left-radius: 5px;
+        }
+
+        .message-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .bot-name {
+            font-weight: 700;
+            color: #2d3436;
+        }
+
+        .timestamp {
+            font-size: 12px;
+            opacity: 0.7;
+        }
+
+        .typing-animation {
+            display: inline-block;
+        }
+
+        .typing-animation::after {
+            content: '|';
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+
+            0%,
+            50% {
+                opacity: 1;
+            }
+
+            51%,
+            100% {
+                opacity: 0;
+            }
+        }
+
+        .input-container {
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            display: flex;
+            gap: 15px;
+        }
+
+        .message-input {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 50px;
+            background: rgba(255, 255, 255, 0.9);
+            font-size: 16px;
+            outline: none;
+        }
+
+        .send-btn {
+            width: 50px;
+            height: 50px;
+            border: none;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4776E6, #8E54E9);
+            color: white;
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .send-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .install-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            padding: 15px 25px;
+            background: linear-gradient(135deg, #ff8a00, #e52e71);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 700;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            display: none;
+            z-index: 1000;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .voice-btn {
+            width: 50px;
+            height: 50px;
+            border: none;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .voice-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .voice-btn.listening {
+            background: #e52e71;
+            animation: pulse 1s infinite;
+        }
+
+        /* Voice input animation */
+        .voice-input-animation {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 5px;
+            margin-top: 5px;
+        }
+
+        .voice-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #e52e71;
+            border-radius: 50%;
+            animation: voicePulse 1.5s infinite ease-in-out;
+        }
+
+        .voice-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .voice-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes voicePulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 0.7;
+            }
+
+            50% {
+                transform: scale(1.5);
+                opacity: 1;
+            }
+        }
+
+        /* Table styles */
+        .result-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+        }
+
+        .result-table th,
+        .result-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .result-table th {
+            background-color: #f2f2f2;
+        }
+
+        .result-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        /* Action buttons */
+        .action-btn {
+            display: inline-block;
+            padding: 8px 15px;
+            margin: 5px;
+            background: linear-gradient(135deg, #4776E6, #8E54E9);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .action-btn:hover {
+            transform: scale(1.05);
+        }
+
+        /* Remove underline from all links in messages */
+        .message a {
+            text-decoration: none;
+        }
+
+        /* Responsive styles */
+        @media (max-width: 768px) {
+            .container {
+                height: 95vh;
+                border-radius: 15px;
+            }
+
+            .message {
+                max-width: 85%;
+            }
+
+            .header {
+                padding: 15px;
+            }
+
+            .app-name {
+                font-size: 18px;
+            }
+
+            .logo {
+                width: 40px;
+                height: 40px;
+                font-size: 16px;
+            }
+
+            .btn {
+                padding: 8px 12px;
+                font-size: 14px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                height: 100vh;
+                border-radius: 0;
+            }
+
+            .message {
+                max-width: 90%;
+                padding: 12px;
+            }
+
+            .input-container {
+                padding: 15px;
+            }
+
+            .send-btn,
+            .voice-btn {
+                width: 45px;
+                height: 45px;
+            }
+
+            .install-btn {
+                bottom: 20px;
+                right: 20px;
+                padding: 12px 20px;
+                font-size: 14px;
+            }
+        }
+    </style>
+
+</head>
+
+<body>
+    <!-- Your existing HTML structure - unchanged -->
+    <div class="container">
+        <div class="header">
+            <div class="logo-container">
+                <div class="logo">AI</div>
+                <div class="app-name">Assistant</div>
+            </div>
+            <div class="controls">
+                <button class="btn" id="exportBtn"><i class="fas fa-download"></i> Export Chat</button>
+                <button class="btn" id="clearBtn"><i class="fas fa-trash"></i> Clear</button>
+            </div>
+        </div>
+
+        <div class="chat-container" id="chatContainer">
+            <!-- Chat messages will be loaded here -->
+        </div>
+
+        <div class="input-container">
+            <input type="text" class="message-input" id="messageInput" placeholder="Type your message here...">
+            <button class="voice-btn" id="voiceBtn"><i class="fas fa-microphone"></i></button>
+            <button class="send-btn" id="sendBtn"><i class="fas fa-paper-plane"></i></button>
+        </div>
+    </div>
+
+    <button class="install-btn" id="installBtn">Install App</button>
+
+    <script>
+        // DOM Elements
+        const chatContainer = document.getElementById('chatContainer');
+        const messageInput = document.getElementById('messageInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const voiceBtn = document.getElementById('voiceBtn');
+        const exportBtn = document.getElementById('exportBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const installBtn = document.getElementById('installBtn');
+
+        // App version and state
+        const VERSION = "1.4.0";
+        let chatHistory = [];
+        let deferredPrompt = null;
+        let recognition = null;
+        let isListening = false;
+        let voiceInputDiv = null;
+
+        // Configuration
+        const APP_VERSION = '1.4.0';
+        const IS_PRODUCTION = window.location.hostname.includes('github.io');
+        const API_BASE_URL = IS_PRODUCTION
+            ? 'https://your-username.github.io/Ghost-Rider-Backend'
+            : 'http://localhost:3000';
+
+        // Version tracking
+        localStorage.setItem('app_version', APP_VERSION);
+
+        // Initialize the app
+        function initApp() {
+            updateTime();
+            loadChatHistory();
+            setupVoiceRecognition();
+            setupEventListeners();
+            checkForOldChats();
+
+            // Add welcome message if no chat history exists
+            if (chatHistory.length === 0) {
+                addMessage("Hello! I'm your AI assistant. How can I help you today?", false);
+            } else {
+                // Render existing chat history
+                renderChatHistory();
+            }
+
+            // Initial message with instructions
+            setTimeout(() => {
+                if (chatHistory.length <= 1) {
+                    addMessage("You can ask me to calculate math problems, generate tables, search Google, play YouTube music, or just chat!", false);
+                }
+            }, 1000);
+        }
+
+        // Update current time
+        function updateTime() {
+            const now = new Date();
+            const timeElement = document.getElementById('current-time');
+            if (timeElement) {
+                timeElement.textContent = now.toLocaleTimeString();
+            }
+        }
+        setInterval(updateTime, 1000);
+
+        // Load chat history from localStorage
+        function loadChatHistory() {
+            const savedChats = localStorage.getItem('ai_chat_history');
+            if (savedChats) {
+                const chatData = JSON.parse(savedChats);
+
+                // Check if chats are older than 12 hours
+                const now = new Date();
+                const savedTime = new Date(chatData.timestamp);
+                const hoursDiff = (now - savedTime) / (1000 * 60 * 60);
+
+                if (hoursDiff < 12) {
+                    chatHistory = chatData.messages;
+                } else {
+                    // Clear expired chats
+                    localStorage.removeItem('ai_chat_history');
+                    chatHistory = [];
+                }
+            }
+        }
+
+        // Save chat history to localStorage
+        function saveChatHistory() {
+            const chatData = {
+                timestamp: new Date().toISOString(),
+                messages: chatHistory
+            };
+            localStorage.setItem('ai_chat_history', JSON.stringify(chatData));
+        }
+
+        // Check for and remove old chats
+        function checkForOldChats() {
+            const savedChats = localStorage.getItem('ai_chat_history');
+            if (savedChats) {
+                const chatData = JSON.parse(savedChats);
+                const now = new Date();
+                const savedTime = new Date(chatData.timestamp);
+                const hoursDiff = (now - savedTime) / (1000 * 60 * 60);
+
+                if (hoursDiff >= 12) {
+                    localStorage.removeItem('ai_chat_history');
+                    if (chatHistory.length > 0) {
+                        chatHistory = [];
+                        renderChatHistory();
+                        addMessage("Your previous chat session has expired. How can I help you today?", false);
+                    }
+                }
+            }
+        }
+
+        // Render chat history to the UI
+        function renderChatHistory() {
+            chatContainer.innerHTML = '';
+            chatHistory.forEach(msg => {
+                if (msg.isSpecial) {
+                    addSpecialMessageToUI(msg.content, msg.timestamp);
+                } else {
+                    addMessageToUI(msg.message, msg.isUser, msg.timestamp);
+                }
+            });
+        }
+
+        // Set up voice recognition
+        function setupVoiceRecognition() {
+            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+                recognition.continuous = true;
+                recognition.lang = 'en-US';
+                recognition.interimResults = true;
+                recognition.maxAlternatives = 1;
+
+                recognition.onstart = () => {
+                    isListening = true;
+                    voiceBtn.classList.add('listening');
+                    showVoiceInputUI();
+                };
+
+                recognition.onresult = (event) => {
+                    let interimTranscript = '';
+                    let finalTranscript = '';
+
+                    for (let i = event.resultIndex; i < event.results.length; i++) {
+                        const transcript = event.results[i][0].transcript;
+                        if (event.results[i].isFinal) {
+                            finalTranscript += transcript;
+                        } else {
+                            interimTranscript += transcript;
+                        }
+                    }
+
+                    // Update the input field with the interim results
+                    if (interimTranscript) {
+                        messageInput.value = finalTranscript + interimTranscript;
+                    }
+
+                    // If we have a final result, send the message
+                    if (finalTranscript) {
+                        messageInput.value = finalTranscript;
+                        stopVoiceRecognition();
+                        sendMessage();
+                    }
+                };
+
+                recognition.onerror = (event) => {
+                    console.error('Speech recognition error', event.error);
+                    stopVoiceRecognition();
+                    addMessage("Sorry, I didn't catch that. Please try again.", false);
+                };
+
+                recognition.onend = () => {
+                    stopVoiceRecognition();
+                };
+            } else {
+                voiceBtn.style.display = 'none';
+                console.warn('Speech recognition not supported in this browser');
+            }
+        }
+
+        // Show voice input UI
+        function showVoiceInputUI() {
+            // Remove any existing voice input UI
+            if (voiceInputDiv) {
+                voiceInputDiv.remove();
+            }
+
+            // Create voice input UI
+            voiceInputDiv = document.createElement('div');
+            voiceInputDiv.classList.add('message', 'user-message');
+            voiceInputDiv.innerHTML = `
+            <div class="message-header">
+                <span class="timestamp">${new Date().toLocaleTimeString()}</span>
+            </div>
+            <p>Listening... <span class="voice-input-animation">
+                <span class="voice-dot"></span>
+                <span class="voice-dot"></span>
+                <span class="voice-dot"></span>
+            </span></p>
+        `;
+
+            chatContainer.appendChild(voiceInputDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        // Stop voice recognition
+        function stopVoiceRecognition() {
+            if (recognition && isListening) {
+                recognition.stop();
+                isListening = false;
+                voiceBtn.classList.remove('listening');
+
+                // Remove voice input UI
+                if (voiceInputDiv) {
+                    voiceInputDiv.remove();
+                    voiceInputDiv = null;
+                }
+            }
+        }
+
+        // Set up event listeners
+        function setupEventListeners() {
+            sendBtn.addEventListener('click', sendMessage);
+
+            messageInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+
+            voiceBtn.addEventListener('click', () => {
+                if (isListening) {
+                    stopVoiceRecognition();
+                } else {
+                    if (recognition) {
+                        try {
+                            recognition.start();
+                        } catch (error) {
+                            console.error('Speech recognition error:', error);
+                            voiceBtn.classList.remove('listening');
+                        }
+                    }
+                }
+            });
+
+            exportBtn.addEventListener('click', exportChat);
+            clearBtn.addEventListener('click', clearChat);
+
+            // PWA Installation
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                installBtn.style.display = 'block';
+            });
+
+            installBtn.addEventListener('click', async () => {
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    const { outcome } = await deferredPrompt.userChoice;
+                    if (outcome === 'accepted') {
+                        installBtn.style.display = 'none';
+                    }
+                    deferredPrompt = null;
+                }
+            });
+        }
+
+        // Function to get AI response from backend
+        async function getAIResponse(userMessage) {
+            // First check if we can handle it locally
+            const localResponse = tryLocalResponse(userMessage);
+            if (localResponse) return localResponse;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/chat`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: userMessage,
+                        sessionId: getSessionId()
+                    }),
+                });
+
+                if (!response.ok) {
+                    throw new Error('API request failed');
+                }
+
+                const data = await response.json();
+                return data.response;
+            } catch (error) {
+                console.error('Error calling backend API:', error);
+                // Fallback to local responses if API fails
+                return getLocalAIResponse(userMessage);
+            }
+        }
+
+        // Generate or retrieve session ID
+        function getSessionId() {
+            let sessionId = localStorage.getItem('chatSessionId');
+            if (!sessionId) {
+                sessionId = 'session-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+                localStorage.setItem('chatSessionId', sessionId);
+            }
+            return sessionId;
+        }
+
+        // Function to handle local responses
+        function tryLocalResponse(message) {
+            const lowerMessage = message.toLowerCase();
+
+            // Handle simple commands locally
+            if (lowerMessage.includes('--version')) {
+                return `AI Assistant Version ${VERSION}`;
+            } else if (lowerMessage.includes('--help')) {
+                return "Available commands: --version (check version), --update (check for updates). You can also ask me to calculate math problems, generate tables, search Google, play YouTube music, or just chat!";
+            } else if (lowerMessage.includes('clear chat')) {
+                // Call clear endpoint
+                fetch(`${API_BASE_URL}/api/clear`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ sessionId: getSessionId() }),
+                });
+                return "Chat history cleared.";
+            }
+
+            // Return null if we can't handle it locally
+            return null;
+        }
+
+        // Your existing local response function (as fallback)
+        function getLocalAIResponse(userMessage) {
+            const message = userMessage.toLowerCase();
+
+            if (message.includes('hello') || message.includes('hi') || message.includes('hey')) {
+                return "Hello! I'm your AI assistant. How can I help you today?";
+            } else if (message.includes('how are you')) {
+                return "I'm doing great, thanks for asking! How can I help you today?";
+            } else if (message.includes('weather')) {
+                return "I don't have real-time weather data, but I can tell you it's a beautiful day to chat with an AI!";
+            } else if (message.includes('time')) {
+                return `The current time is ${new Date().toLocaleTimeString()}.`;
+            } else if (message.includes('name')) {
+                return "I'm your friendly AI assistant, created to help and chat with you!";
+            } else if (message.includes('joke')) {
+                const jokes = [
+                    "Why don't scientists trust atoms? Because they make up everything!",
+                    "Why did the scarecrow win an award? Because he was outstanding in his field!"
+                ];
+                return jokes[Math.floor(Math.random() * jokes.length)];
+            } else if (message.includes('love')) {
+                return "I'm here to help and provide information, but I'm not capable of feeling emotions like love.";
+            } else if (message.includes('meaning of life')) {
+                return "The meaning of life is a profound question. Many believe it's about learning, growing, and helping others.";
+            } else if (message.includes('install') || message.includes('download')) {
+                showInstallPrompt();
+                return "I can help you install this app as a PWA on your device. Click the install button that appears!";
+            } else {
+                const defaultResponses = [
+                    "That's interesting. Tell me more!",
+                    "I see. What else would you like to know?",
+                    "Fascinating! Is there anything else you'd like to discuss?"
+                ];
+                return defaultResponses[Math.floor(Math.random() * defaultResponses.length)];
+            }
+        }
+
+        // Add message to UI
+        function addMessageToUI(message, isUser = false, timestamp = null) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message');
+            messageDiv.classList.add(isUser ? 'user-message' : 'bot-message');
+
+            const messageTime = timestamp ? new Date(timestamp) : new Date();
+            const timeString = messageTime.toLocaleTimeString();
+
+            if (!isUser) {
+                messageDiv.innerHTML = `
+                <div class="message-header">
+                    <span class="bot-name">Assistant</span>
+                    <span class="timestamp">${timeString}</span>
+                </div>
+                <p>${message}</p>
+            `;
+            } else {
+                messageDiv.innerHTML = `
+                <div class="message-header">
+                    <span class="timestamp">${timeString}</span>
+                </div>
+                <p>${message}</p>
+            `;
+            }
+
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        // Add special message (with HTML content)
+        function addSpecialMessage(content) {
+            const timestamp = new Date().toISOString();
+
+            // Add to chat history
+            chatHistory.push({
+                isSpecial: true,
+                content: content,
+                timestamp: timestamp
+            });
+
+            // Save to localStorage
+            saveChatHistory();
+
+            // Add to UI
+            addSpecialMessageToUI(content, timestamp);
+        }
+
+        // Add special message to UI
+        function addSpecialMessageToUI(content, timestamp) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message', 'bot-message');
+
+            const messageTime = new Date(timestamp);
+            const timeString = messageTime.toLocaleTimeString();
+
+            messageDiv.innerHTML = `
+            <div class="message-header">
+                <span class="bot-name">Assistant</span>
+                <span class="timestamp">${timeString}</span>
+            </div>
+            <div>${content}</div>
+        `;
+
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        // Add message to chat history
+        function addMessage(message, isUser = false) {
+            const timestamp = new Date().toISOString();
+
+            // Add to chat history
+            chatHistory.push({
+                message,
+                isUser,
+                timestamp,
+                isSpecial: false
+            });
+
+            // Save to localStorage
+            saveChatHistory();
+
+            // Add to UI
+            addMessageToUI(message, isUser, timestamp);
+        }
+
+        // Function to simulate typing animation
+        function typeMessage(message, callback) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message', 'bot-message');
+
+            const now = new Date();
+            const timeString = now.toLocaleTimeString();
+
+            messageDiv.innerHTML = `
+            <div class="message-header">
+                <span class="bot-name">Assistant</span>
+                <span class="timestamp">${timeString}</span>
+            </div>
+            <p class="typing-animation">Typing</p>
+        `;
+
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+
+            // Remove the typing indicator and add the actual message
+            setTimeout(() => {
+                messageDiv.querySelector('p').classList.remove('typing-animation');
+
+                let i = 0;
+                const text = message;
+                const timer = setInterval(() => {
+                    if (i < text.length) {
+                        messageDiv.querySelector('p').textContent = text.substring(0, i + 1);
+                        i++;
+                        chatContainer.scrollTop = chatContainer.scrollHeight;
+                    } else {
+                        clearInterval(timer);
+                        // Add to chat history
+                        const timestamp = new Date().toISOString();
+                        chatHistory.push({
+                            message: text,
+                            isUser: false,
+                            timestamp: timestamp,
+                            isSpecial: false
+                        });
+
+                        // Save to localStorage
+                        saveChatHistory();
+
+                        // Speak the message
+                        if (callback) callback(text);
+                    }
+                }, 50);
+            }, 1000);
+        }
+
+        // Function to speak text
+        function speakText(text) {
+            if ('speechSynthesis' in window) {
+                const speech = new SpeechSynthesisUtterance();
+                speech.text = text;
+                speech.volume = 1;
+                speech.rate = 0.9;
+                speech.pitch = 1;
+                speech.lang = 'en-US';
+
+                window.speechSynthesis.speak(speech);
+            }
+        }
+
+        // Function to handle sending message
+        function sendMessage() {
+            const message = messageInput.value.trim();
+            if (message) {
+                addMessage(message, true);
+                messageInput.value = '';
+
+                // Get AI response
+                const response = getAIResponse(message);
+
+                // Show typing animation and then display response
+                typeMessage(response, (typedText) => {
+                    speakText(typedText);
+                });
+            }
+        }
+
+        // Export chat history
+        function exportChat() {
+            const password = prompt("Enter password to export chat:");
+            if (password === "Arpit@232422") {
+                let exportData = "AI Assistant Chat History\n\n";
+                chatHistory.forEach(entry => {
+                    const date = new Date(entry.timestamp);
+                    if (entry.isSpecial) {
+                        // For special messages, extract text content from HTML
+                        const tempDiv = document.createElement('div');
+                        tempDiv.innerHTML = entry.content;
+                        const textContent = tempDiv.textContent || tempDiv.innerText || '';
+                        exportData += `[${date.toLocaleString()}] Assistant: ${textContent}\n`;
+                    } else {
+                        exportData += `[${date.toLocaleString()}] ${entry.isUser ? 'You' : 'Assistant'}: ${entry.message}\n`;
+                    }
+                });
+
+                const blob = new Blob([exportData], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'chat-history.txt';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            } else {
+                alert("Incorrect password!");
+            }
+        }
+
+        // Clear chat
+        function clearChat() {
+            const password = prompt("Enter password to clear chat:");
+            if (password === "Arpit@232422") {
+                chatContainer.innerHTML = '';
+                chatHistory = [];
+                saveChatHistory();
+                addMessage("Chat history cleared. How can I help you today?", false);
+            } else {
+                alert("Incorrect password!");
+            }
+        }
+
+        // Show install prompt
+        function showInstallPrompt() {
+            if (deferredPrompt) {
+                installBtn.style.display = 'block';
+            }
+        }
+
+        // Add this new function for version checking
+        function checkForUpdates() {
+            const savedVersion = localStorage.getItem('app_version');
+            if (savedVersion !== APP_VERSION) {
+                if (confirm(`New version ${APP_VERSION} available! Reload to update?`)) {
+                    localStorage.setItem('app_version', APP_VERSION);
+                    window.location.reload(true);
+                }
+            }
+        }
+
+        // Check for updates every hour
+        setInterval(checkForUpdates, 60 * 60 * 1000);
+        // Also check on load
+        setTimeout(checkForUpdates, 5000);
+
+        // Service Worker Registration for PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js').then(registration => {
+                    console.log('SW registered: ', registration);
+                }).catch(registrationError => {
+                    console.log('SW registration failed: ', registrationError);
+                });
+            });
+        }
+
+        // Initialize the app
+        initApp();
+    </script>
+</body>
+
+</html>
